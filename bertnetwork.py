@@ -147,7 +147,7 @@ import sys
 
 
 #load data from pickled files
-from maskload import *
+from load_bert_data import *
 
 
 x_train, x_test, x_train_mask, x_test_mask, y_train, y_test, tokenizer=load_masked_data('berted_deception.pkl','berted_truthful.pkl', max_length=300, masked_pos=None)#subsitute None for a given part of speech in the list
