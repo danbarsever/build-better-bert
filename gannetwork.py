@@ -56,17 +56,42 @@ class Attention(nn.Module):
 
         return condensed_x
 
+#unused test network
+class ClassifierNet(nn.Module):
+	def __init__(self):
+		super(ClassifierNet, self).__init__()
+		self.dropout=nn.Dropout(.5)
+		self.dropout=nn.Dropout(.5)
+		self.conv1=nn.Conv1d(768,768,1)
+		self.lstm=nn.LSTM(input_size=768, hidden_size=384, num_layers=2, dropout=.5, bidirectional=True)
+		self.attention=Attention(768)
+		self.classifier=nn.Linear(768,2)
+	def forward(self, x):
+		# x=self.conv1(x.unsqueeze(-1))
 
+		# x=self.dropout(x)
+		# x=self.classifier(x.squeeze(-1))
 
+		x,(h,c)=self.lstm(x.unsqueeze(0))
+		# # x=x.view(x.shape[1],1,-1)
+		# x=self.attention(input.unsqueeze(1))
+		
+		x=self.classifier(x.squeeze(0))
+
+		return x
 class Net(nn.Module):
 	def __init__(self):
 		super(Net, self).__init__()
 		self.bert = BertModelFloater.from_pretrained('bert-base-uncased') #changed to Floater
-
+		self.classnet=ClassifierNet()#unused
+		self.dropout=nn.Dropout(.5)#unused
+		self.conv1=nn.Conv1d(768,768,1)#unused
 		self.lstm=nn.LSTM(input_size=768, hidden_size=384, num_layers=2, dropout=.5, bidirectional=True)
 		self.attention=Attention(768)
 		self.classifier=nn.Linear(768,2)
+		self.lampam=torch.nn.Parameter(torch.rand(1))#unused
 
+		#self.apply(self.bert.init_bert_weights)
 	def forward(self, input, attention_mask=None):
 
 		x=input
@@ -74,15 +99,28 @@ class Net(nn.Module):
 			x=self.bert.embeddings(x)
 
 		_,x=self.bert(x, attention_mask=attention_mask)
+		# x=x.detach()
+		# print(x.shape)
+		# x=self.conv1(x.unsqueeze(-1))
+
+		# x=self.dropout(x)
+		# x=self.classifier(x.squeeze(-1))
 
 		x,(h,c)=self.lstm(x.unsqueeze(0))
 
-
+		# # x=x.view(x.shape[1],1,-1)
 		x=self.attention(x.view(x.shape[1],1,768))
 
 		x=self.classifier(x)
 
 		return x
+
+	def penalty(self):
+		#print(self.classifier.weight.norm().shape)
+		#print()
+		#print(self.classifier.weight.shape)
+		l2cost=torch.sum(self.classifier.weight[0].pow(2))+torch.sum(self.classifier.weight[1].pow(2))
+		return l2cost*self.lampam*.01
 
 
 		
