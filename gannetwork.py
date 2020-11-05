@@ -131,7 +131,7 @@ rev_length=50
 
 
 from excise_load import *
-from ganload import *
+from load_gan_data import *
 
 dec, tru, decmask, trumask, dec_test, tru_test, decmask_test, trumask_test, tokenizer=load_masked_data('berted_deception.pkl','berted_truthful.pkl', max_length=rev_length)
 
